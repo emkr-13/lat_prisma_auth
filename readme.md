@@ -27,7 +27,7 @@ npm install
 
 ## Menjalankan Migration dan Seeder
 
-Untuk informasi lebih lanjut, baca dokumentasi resmi di [Prisma ORM Documentation](https://orm.drizzle.team/docs/get-started/postgresql-new).
+Untuk informasi lebih lanjut, baca dokumentasi resmi di [Prisma ORM Documentation](https://www.prisma.io/docs/getting-started/setup-prisma/add-to-existing-project/relational-databases-typescript-postgresql).
 
 ### Step 1: Generate dari dari Prisma dan Migration
 
