@@ -1,4 +1,3 @@
-npx prisma migrate dev --name init
 # Latihan Prisma
 
 Teknologi yang digunakan:

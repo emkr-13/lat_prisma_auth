@@ -58,6 +58,62 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+export const register = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { username, name,password } = req.body;
+    // Validasi input
+    if (!username || !name || !password) {
+      sendResponse(res, 400, "Username, name, and password are required");
+      return;
+    }
+    // Cek apakah username sudah ada
+    const existingUser = await prisma.user.findUnique({
+      where: { username },
+    });
+    if (existingUser) {
+      sendResponse(res, 400, "Username already exists");
+      return;
+    }
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    // Buat user baru
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        name,
+        password: hashedPassword,
+      },
+    });
+    // Generate token
+    const authToken = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET!, {
+      expiresIn: parseInt(process.env.AUTH_TOKEN_EXP!, 10),
+    });
+    const refreshToken = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET!, {
+      expiresIn: parseInt(process.env.REFRESH_TOKEN_EXP!, 10),
+    });
+    // Update refresh token di database
+    await prisma.user.update({
+      where: { id: newUser.id },
+      data: {
+        refreshToken,
+        refreshTokenExp: new Date(
+          Date.now() + parseInt(process.env.REFRESH_TOKEN_EXP!) * 1000
+        ),
+      },
+    });
+    sendResponse(res, 201, "Registration successful", {
+      token: authToken,
+      refreshToken,
+    });
+    
+  } catch (error) {
+    console.error("Error during registration:", error);
+    sendResponse(res, 500, "Registration failed", error);
+    
+  }
+}
+
 export const logout = async (req: Request, res: Response): Promise<void> => {
   try {
     // Ambil user ID dari request (dari middleware authenticate)

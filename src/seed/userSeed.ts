@@ -11,7 +11,8 @@ async function main() {
   // Seed the database with users and posts
   const user1 = await prisma.user.create({
     data: {
-      username: "admin1",
+      username: "admin",
+      name: "Admin",
       password: hashedPassword,
     },
   });
