@@ -1,4 +1,4 @@
-import prisma from "../config/db";
+import db from "../config/db";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Request, Response } from "express";
@@ -14,7 +14,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     // Cari user
-    const user = await prisma.user.findUnique({ where: { username } });
+    const user = await db.user.findUnique({ where: { username } });
     if (!user) sendResponse(res, 401, "Invalid credentials");
 
     // Verifikasi password
@@ -38,7 +38,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     });
 
     // Update refresh token di database
-    await prisma.user.update({
+    await db.user.update({
       where: { id: user.id },
       data: {
         refreshToken,
@@ -67,7 +67,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
     // Cek apakah username sudah ada
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await db.user.findUnique({
       where: { username },
     });
     if (existingUser) {
@@ -78,7 +78,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     // Buat user baru
-    const newUser = await prisma.user.create({
+    const newUser = await db.user.create({
       data: {
         username,
         name,
@@ -93,7 +93,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       expiresIn: parseInt(process.env.REFRESH_TOKEN_EXP!, 10),
     });
     // Update refresh token di database
-    await prisma.user.update({
+    await db.user.update({
       where: { id: newUser.id },
       data: {
         refreshToken,
@@ -119,7 +119,7 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
     // Ambil user ID dari request (dari middleware authenticate)
     const userId = (req as any).user.id;
 
-    await prisma.user.update({
+    await db.user.update({
       where: { id: userId },
       data: {
         refreshToken: null,

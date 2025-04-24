@@ -1,6 +1,6 @@
-import { PrismaClient } from "@prisma/client";
+import db from "../config/db";
 import bcrypt from "bcryptjs";
-const prisma = new PrismaClient();
+const prisma = db;
 
 // A `main` function so that we can use async/await
 async function main() {
